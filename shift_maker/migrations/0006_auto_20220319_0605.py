@@ -2,24 +2,28 @@
 
 import datetime
 from django.db import migrations, models
-from django.utils.timezone import utc
+from datetime import timezone
 
 
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('shift_maker', '0005_auto_20220317_1545'),
+        ("shift_maker", "0005_auto_20220317_1545"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='workcontent',
-            name='detail',
-            field=models.TextField(blank=True, verbose_name='テキスト'),
+            model_name="workcontent",
+            name="detail",
+            field=models.TextField(blank=True, verbose_name="テキスト"),
         ),
         migrations.AlterField(
-            model_name='shift',
-            name='deadline',
-            field=models.DateField(default=datetime.datetime(2022, 3, 21, 21, 5, 58, 881669, tzinfo=utc)),
+            model_name="shift",
+            name="deadline",
+            field=models.DateField(
+                default=datetime.datetime(
+                    2022, 3, 21, 21, 5, 58, 881669, tzinfo=timezone.utc
+                )
+            ),
         ),
     ]

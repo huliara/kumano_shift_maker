@@ -5,64 +5,72 @@ from django.conf import settings
 from django.db import migrations, models
 import django.db.models.deletion
 import django.utils.timezone
-from django.utils.timezone import utc
+from datetime import timezone
 
 
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('shift_maker', '0003_auto_20211223_1511'),
+        ("shift_maker", "0003_auto_20211223_1511"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='shift',
-            name='is_decided',
+            model_name="shift",
+            name="is_decided",
             field=models.BooleanField(default=False),
         ),
         migrations.AlterField(
-            model_name='shift',
-            name='creater',
-            field=models.ForeignKey(default=1, on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL),
+            model_name="shift",
+            name="creater",
+            field=models.ForeignKey(
+                default=1,
+                on_delete=django.db.models.deletion.CASCADE,
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
         migrations.AlterField(
-            model_name='shift',
-            name='deadline',
-            field=models.DateField(default=datetime.datetime(2022, 3, 10, 12, 24, 50, 441498, tzinfo=utc)),
+            model_name="shift",
+            name="deadline",
+            field=models.DateField(
+                default=datetime.datetime(
+                    2022, 3, 10, 12, 24, 50, 441498, tzinfo=timezone.utc
+                )
+            ),
         ),
         migrations.AlterField(
-            model_name='shift',
-            name='first_day',
+            model_name="shift",
+            name="first_day",
             field=models.DateField(default=django.utils.timezone.now),
         ),
         migrations.AlterField(
-            model_name='slot',
-            name='day',
+            model_name="slot",
+            name="day",
             field=models.DateField(default=django.utils.timezone.now),
         ),
         migrations.AlterField(
-            model_name='slot',
-            name='days_from_start',
+            model_name="slot",
+            name="days_from_start",
             field=models.PositiveIntegerField(default=0),
         ),
         migrations.AlterField(
-            model_name='slot',
-            name='end_time',
+            model_name="slot",
+            name="end_time",
             field=models.TimeField(default=datetime.time(12, 0)),
         ),
         migrations.AlterField(
-            model_name='slot',
-            name='required_number',
+            model_name="slot",
+            name="required_number",
             field=models.PositiveIntegerField(default=1),
         ),
         migrations.AlterField(
-            model_name='slot',
-            name='start_time',
+            model_name="slot",
+            name="start_time",
             field=models.TimeField(default=datetime.time(10, 0)),
         ),
         migrations.AlterField(
-            model_name='workcontent',
-            name='workload',
+            model_name="workcontent",
+            name="workload",
             field=models.IntegerField(default=0),
         ),
     ]

@@ -1,9 +1,4 @@
-from dataclasses import fields
-from string import Template
-from urllib import request
-from django import forms
 from django.http import HttpResponseRedirect
-from django.http.response import Http404
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls.base import reverse_lazy
 from django.views.generic import (
@@ -17,7 +12,6 @@ from django.urls import reverse
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import PasswordChangeView, PasswordChangeDoneView
 from django.db.models import Count, F
-from django.views.generic.detail import DetailView
 from .models import Slot, Shift, User, ShiftTemplate, WorkContent
 from .forms import ShiftForm, ShiftFormFromTemplate, MyPasswordChangeForm
 from datetime import timedelta
@@ -31,13 +25,16 @@ import datetime
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 
+
 # Create your views here.
 # 回答フォームのビュー
 @login_required
 def shift_recruit_view(request, pk):
     shift = get_object_or_404(Shift, pk=pk)
     if shift.is_decided:
-        return HttpResponseRedirect(reverse("shift_maker:result_schedule", args=[shift.pk]))
+        return HttpResponseRedirect(
+            reverse("shift_maker:result_schedule", args=[shift.pk])
+        )
     forms = ShiftForm(request.POST or None, instance=shift)
     if forms.is_valid():
         forms.save()
@@ -199,7 +196,9 @@ class MyPageView(LoginRequiredMixin, TemplateView):
         context["made_shifts"] = Shift.objects.filter(
             creater=self.request.user, is_decided=False
         )
-        context["others_shifts"]=Shift.objects.exclude(creater=self.request.user,is_decided=True)
+        context["others_shifts"] = Shift.objects.exclude(
+            creater=self.request.user, is_decided=True
+        )
         return context
 
 
@@ -276,7 +275,6 @@ def shift_calculate(request, pk):
         fieldnames=["required_number", "content__workload", "content__id"],
         index_col="id",
     )
-    print(slot_df)
     users = User.objects.filter(Block_name=shift.target)
     users_df = read_frame(users, fieldnames=["workload_sum"], index_col="id")
     user_ids = users.values_list("id", flat=True)
@@ -319,7 +317,7 @@ def shift_calculate(request, pk):
         k += lpDot(h, n) <= 0
     # 同じ時間帯の枠に同じ人が入らないようにする制約条件
     # エラー発生中
-    for index, r in var.iteritems():
+    for index, r in var.items():
         print(r)
         print(overlapping_pairs)
         for i in range(len(overlapping_pairs)):
@@ -339,7 +337,7 @@ def shift_calculate(request, pk):
             lpDot(exp_df.loc[slot_df.at[index, "content__id"]], d) + r.V_experience >= 1
         )
     # 合計仕事量が均等になるようにする制約条件
-    for column, w in var.iteritems():
+    for column, w in var.items():
         k += (
             lpDot(slot_df["content__workload"], w) + users_df.at[column, "workload_sum"]
             <= V_worksum_diff
@@ -376,6 +374,7 @@ def shift_calculate(request, pk):
     shift.save()
     messages.success(request, "シフト作成完了", fail_silently=True)
     return HttpResponseRedirect(reverse("shift_maker:result_schedule", args=[shift.pk]))
+
 
 @login_required
 def shift_calculate_result(request, pk):
@@ -415,6 +414,7 @@ def assign_content(request, pk):
 
 # 人数不足スロットの登録処理
 
+
 # テスト１
 def assign_lack_slot(request, pk):
     slot = Slot.objects.get(pk=pk)
@@ -433,43 +433,45 @@ def assign_lack_slot(request, pk):
     messages.success(request, "%s 登録しました" % slot.workname, fail_silently=True)
     return HttpResponseRedirect(reverse("shift_maker:mypage"))
 
-def assign_slot(request,pk):
+
+def assign_slot(request, pk):
     slot = Slot.objects.get(pk=pk)
     user = request.user
     if slot in user.assigning_slot.all():
         messages.warning(request, "既にこの仕事に入っています", fail_silently=True)
-        return redirect(request.META['HTTP_REFERER'])
+        return redirect(request.META["HTTP_REFERER"])
     workload = Slot.objects.values_list("content__workload", flat=True).get(pk=pk)
     user.assigning_slot.add(slot)
     if overlapping_slots(user.assigning_slot.all()):
         user.assigning_slot.remove(slot)
         messages.warning(request, "同じ時間帯に仕事に入っています", fail_silently=True)
-        return redirect(request.META['HTTP_REFERER'])
+        return redirect(request.META["HTTP_REFERER"])
     user.workload_sum += workload
     user.save()
     messages.success(request, "%s 登録しました" % slot.workname, fail_silently=True)
-    return redirect(request.META['HTTP_REFERER'])
+    return redirect(request.META["HTTP_REFERER"])
 
-def replace_slot(request,slot_id,user_id):
+
+def replace_slot(request, slot_id, user_id):
     slot = Slot.objects.get(pk=slot_id)
     user = request.user
-    target=User.objects.get(pk=user_id)
+    target = User.objects.get(pk=user_id)
     if slot in user.assigning_slot.all():
         messages.warning(request, "既にこの仕事に入っています", fail_silently=True)
-        return redirect(request.META['HTTP_REFERER'])
+        return redirect(request.META["HTTP_REFERER"])
     workload = Slot.objects.values_list("content__workload", flat=True).get(pk=slot_id)
     user.assigning_slot.add(slot)
     if overlapping_slots(user.assigning_slot.all()):
         user.assigning_slot.remove(slot)
         messages.warning(request, "同じ時間帯に仕事に入っています", fail_silently=True)
-        return redirect(request.META['HTTP_REFERER'])
+        return redirect(request.META["HTTP_REFERER"])
     user.workload_sum += workload
     user.save()
     target.assigning_slot.remove(slot)
     target.workload_sum -= workload
     target.save()
     messages.success(request, "%s 交代しました" % slot.workname, fail_silently=True)
-    return redirect(request.META['HTTP_REFERER'])
+    return redirect(request.META["HTTP_REFERER"])
 
 
 # 登録済みスロットの登録解除
