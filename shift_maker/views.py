@@ -346,7 +346,7 @@ def shift_calculate(request, pk):
     k += (
         C_need_diff_over * lpSum(df.V_need_dif_over)
         + C_need_diff_shortage * lpSum(df.V_need_dif_shortage)
-        # + C_experience * lpSum(df.V_experience)
+        # + C_experience * lpSum(df.e)
         + C_minmax * V_worksum_diff
     )
     k.solve()
